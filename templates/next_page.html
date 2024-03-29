@@ -1,0 +1,61 @@
+{% from 'bootstrap5/form.html' import render_form %} {% block content %}
+{% include 'header.html' %}
+
+
+
+<div class="container mx-5">
+
+    <form id="nextForm" method="post" action="{{url_for('next_page')}}" class="mt-4">
+        {{ form.hidden_tag() }}
+        {% for website in selected_websites %}
+        <h2>{{ website.title() }}</h2>
+        <div class="form-group my-3">
+            <label for="username_{{ website }}">Username:</label>
+            <input type="text" name="username_{{ website }}" id="username_{{ website }}" class="form-control">
+        </div>
+        <div class="form-group my-3">
+            <label for="password_{{ website }}">Password:</label>
+            <input type="password" name="password_{{ website }}" id="password_{{ website }}" class="form-control">
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <!-- Spinner -->
+<div id="spinner" class="d-none text-center mt-3">
+    <div class="spinner-border spinner-border-lg text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('nextForm');
+        var spinner = document.getElementById('spinner');
+
+        form.addEventListener('submit', function(event) {
+            // Show spinner when form is submitted
+            spinner.classList.remove('d-none');
+            // Prevent default form submission
+            event.preventDefault();
+            // Submit form via AJAX
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: form.method,
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Redirect to user_page
+                window.location.href = data.redirect;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Hide spinner if there's an error
+                spinner.classList.add('d-none');
+            });
+        });
+    });
+</script>
+{% include 'footer.html' %}
+{% endblock %}

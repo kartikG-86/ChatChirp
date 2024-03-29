@@ -1,0 +1,50 @@
+{% block content %}
+{% include 'header.html' %}
+<div class="container py-5">
+  <div class="row justify-content-center py-5 my-5 mx-2">
+    <div class="col-md-8 col-lg-4 col-12">
+      <div class="card shadow p-3 mb-5 bg-white rounded">
+        <div class="card-body">
+          <h5 class="card-title text-center mb-4">Create Server</h5>
+          <div id="errorContainer" class="text-danger">
+            <!-- Error message will appear here -->
+          </div>
+          <form id="createServerForm">
+            <div class="form-floating mb-3">
+              <input type="text" name="serverName" class="form-control" id="serverName" placeholder="Enter server name" required />
+              <label for="serverName">Server</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block col-12">Create</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const socket = io();
+
+  document.getElementById('createServerForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const serverName = document.getElementById('serverName').value;
+
+      socket.emit('create_server', serverName);
+  });
+
+  // Listen for server response
+  socket.on('server_created', (response) => {
+      if (response.error) {
+          // Display error message
+          document.getElementById('errorContainer').innerText = response.message;
+      } else {
+          // Redirect user upon successful creation
+          const url = response.url;
+          window.location.href = url;
+      }
+  });
+</script>
+
+{% include 'footer.html' %}
+{% endblock %}

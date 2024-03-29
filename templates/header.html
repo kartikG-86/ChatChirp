@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Chirp</title>
+    {% block styles %}
+    <!-- Load Bootstrap-Flask CSS here -->
+    {{ bootstrap.load_css() }}
+    <style>
+        .no-padding .col {
+      padding: 0 !important;
+    }
+            .card-border {
+      border: 1px solid rgba(0, 0, 0, 0.125);
+
+    }
+
+.row-hover {
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.row-hover:hover {
+    background-color: #d7d9dc;
+    color: black;
+}
+.commenterImage {
+  width:30px;
+  margin-right:5px;
+  height:100%;
+  float:left;
+}
+        .commenterImage img {
+  width:100%;
+  border-radius:50%;
+}
+
+
+        .profileImage  {
+  width:100%;
+  border-radius:50%;
+}
+.chat-wrapper {
+    position: absolute;
+    bottom: 10px;
+    width: 55%;
+
+}
+
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-left {
+    align-self: flex-start;
+    margin-bottom: 10px; /* Adjust as needed */
+
+}
+
+.message-right {
+    align-self: flex-end;
+    margin-bottom: 10px; /* Adjust as needed */
+}
+
+.message {
+    background-color: lightblue; /* Example background color */
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 20rem;
+}
+
+.timestamp {
+    align-self: flex-end;
+    color: gray; /* Example color */
+    font-size: 12px; /* Example font size */
+}
+
+.username {
+    font-weight: bold; /* Example styling */
+    margin-right: 10px; /* Example margin */
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    margin:0.7rem 0;
+}
+
+.message-header {
+    align-self: flex-start;
+}
+
+.message-body {
+    align-self: center;
+}
+
+.message-footer {
+    align-self: flex-end;
+}
+
+.edit_body {
+    margin: 0;
+    padding-top: 40px;
+    color: #2e323c;
+    background: #f5f6fa;
+    position: relative;
+    height: 100%;
+}
+
+        .account-settings .user-profile {
+    margin: 0 0 1rem 0;
+    padding-bottom: 1rem;
+    text-align: center;
+}
+.account-settings .user-profile .user-avatar {
+    margin: 0 0 1rem 0;
+}
+.account-settings .user-profile .user-avatar img {
+    width: 90px;
+    height: 90px;
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    border-radius: 100px;
+}
+.account-settings .user-profile h5.user-name {
+    margin: 0 0 0.5rem 0;
+}
+.account-settings .user-profile h6.user-email {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #9fa8b9;
+}
+.account-settings .about {
+    margin: 2rem 0 0 0;
+    text-align: center;
+}
+.account-settings .about h5 {
+    margin: 0 0 15px 0;
+    color: #007ae1;
+}
+.account-settings .about p {
+    font-size: 0.825rem;
+}
+.form-control {
+    border: 1px solid #cfd1d8;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    font-size: .825rem;
+    background: #ffffff;
+    color: #2e323c;
+}
+
+.card {
+    background: #ffffff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: 0;
+    margin-bottom: 1rem;
+}
+
+.new_joiner{
+  padding:0.5rem;
+  margin: 2rem 0;
+  background:#D3D3D3;
+  color:black;
+}
+
+.messageBox {
+    width: 100%;
+    height: 33rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f7c6c5; /* Light pink background color */
+}
+
+.message {
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #ffffff; /* White background color for message */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Box shadow for depth */
+}
+
+.message h2 {
+    color: #333333; /* Dark gray color for heading */
+}
+
+.message p {
+    color: #666666; /* Medium gray color for text */
+    margin-bottom: 20px;
+}
+
+.btn-primary {
+    background-color: #4CAF50; /* Green button color */
+    color: #ffffff; /* White text color */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #45a049; /* Darker green color on hover */
+}
+        .show {
+    display: block !important; /* or inline-block, depending on the element */
+}
+
+.list-group li {
+  margin-bottom: 12px;
+}
+
+.list-group-item {
+}
+
+.list li {
+  list-style: none;
+  padding: 10px;
+
+  margin-top: 12px;
+  border-radius: 5px;
+  background: #fff;
+
+}
+
+.user-list {
+    /* Define initial styles */
+    position: relative;
+    top: 0;
+    left: 0;
+    z-index: 100; /* Ensure it's above other content */
+    background-color: white; /* Optional: Set background color */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Optional: Add shadow */
+    transition: opacity 0.3s ease-in-out; /* Smooth transition for opacity */
+}
+
+            .navbar-brand,
+    .form-inline .btn {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .badge {
+        margin-left: 5px; /* Adjust margin as needed */
+    }
+
+        #notificationModal .modal-body {
+    max-height: 400px; /* Set the maximum height of the modal body */
+    overflow-y: auto; /* Add vertical scrollbar when content overflows */
+}
+
+                .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #333;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+
+    </style>
+    <link
+            rel="icon"
+            type="image/x-icon"
+            href="{{ url_for('static', filename='assets/favicon.ico') }}"
+    />
+    <!-- Font Awesome icons (free version)-->
+    <script
+            src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"
+            crossorigin="anonymous"
+    ></script>
+    <!-- Google fonts-->
+    <link
+            href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic"
+            rel="stylesheet"
+            type="text/css"
+    />
+    <link
+            href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800"
+            rel="stylesheet"
+            type="text/css"
+    />
+    <!--    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <!--    <link-->
+    <!--      href="{{ url_for('static', filename='css/styles.css') }}"-->
+    <!--      rel="stylesheet"-->
+    <!--    />-->
+    {% endblock %}
+</head>
+<body>
+
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

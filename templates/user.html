@@ -1,0 +1,681 @@
+{% block content %}
+{% include 'header.html' %}
+
+<div class="container-fluid">
+    <div class="row" style="height:100vh;overflow-y:hidden">
+
+        <div class="col-lg-1 d-none d-lg-block  card-border" style="background:#e3e5e8;">
+            <div class="text-center py-2" style="color:purple">
+                <i class="bi bi-chat-quote" style="font-size:3rem"></i>
+            </div>
+            <div class="text-center my-5">
+                <!-- Plus-circle icon with href -->
+                <a href="/server" style="text-decoration:None;color:black">
+                    <i class="bi bi-plus-circle" style="font-size:2rem;"></i>
+                </a>
+            </div>
+            <div class="text-center my-5 ">
+                <!-- Person-circle icon with modal trigger -->
+                <i class="bi bi-person-circle" style="font-size:2rem; cursor:pointer;" data-bs-toggle="modal"
+                   data-bs-target="#userProfileModal"></i>
+            </div>
+
+            <div class="text-center my-5">
+                <!-- Plus-circle icon with href -->
+                <a href="{{url_for('logout')}}" style="text-decoration:None;color:black">
+                    <i class="bi bi-power" style="font-size:2rem;"></i>
+                </a>
+            </div>
+        </div>
+
+
+        <div class="col-lg-11 d-none d-lg-block" style="">
+            <div class="row">
+                <nav class="navbar navbar-expand-lg bg-body-tertiary">
+                    <div class="container-fluid">
+                        <a class="navbar-brand fs-4" href="#">Welcome {{user.username}}</a>
+                        <form class="d-flex" role="search">
+                            <a type="button" class="btn" style="width:10rem" data-bs-toggle="modal"
+                               data-bs-target="#notificationModal">
+                                <span> <i class="bi bi-bell"></i></span> <span class="badge text-bg-secondary">
+                                {{notifications | length}}
+                            </span>
+                            </a>
+                            <span class="form-control btn me-2" data-bs-toggle="modal" data-bs-target="#searchModal">Find or start a conversation</span>
+
+                            <!--        <button class="btn btn-outline-success" type="submit">Search</button>-->
+                        </form>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="row" style="height:91vh;">
+                <div class="col-lg-2 d-none d-lg-block card-border"
+                     style="height:100%;background:#f2f3f5;overflow-y:scroll">
+                    <div class="container-fluid">
+                        <p class="text-center" style="color:#6972a3">Joined Servers</p>
+                    </div>
+                    {% for server in server_joined: %}
+                    <!-- Container with hover effect -->
+                    <a href="{{url_for('server_open',id= server.id )}}" type="button"
+                       style="text-decoration:None; color:black" class="row server-item text-start fs-6 py-3 row-hover"
+                       data-server-id="{{ server.id }}">
+                        <div class="col-12">
+                            <div class="commenterImage me-4">
+                                <img class="commenterImage" src="{{ server.server_name | gravatar }}"/>
+                            </div>
+                            {{ server.server_name }}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+
+
+                <!-- Column 3 (only visible on laptop screens) -->
+                <div class="col-lg-8 d-none d-lg-block full-height card-border">
+                    <!-- Chat sections for each server -->
+
+                    {% if category == "None" %}
+
+                    <div class="container-fluid py-5 text-center">
+                        <img class="my-5" style="width:20rem"
+                             src="{{ url_for('static', filename='assets/img/background_img.jpg') }}" alt="..."/>
+                        <h4 style="text-center">Unlock the gateway to communication by starting up a server now!</h4>
+                    </div>
+
+                    {% elif category == "Server" %}
+
+                    <div id="chatSection-{{ user_open_server.id }}" class="chat-section ">
+
+                        {% if {'person_name':user.username, 'serverId': user_open_server.id} in server_people %}
+
+                        <div class="server-row" data-server-id="{{ user_open_server.id }}" data-bs-toggle="collapse"
+                             href="#collapseExample" role="button" aria-expanded="false"
+                             aria-controls="collapseExample">
+                            <div class="row fs-4 px-3 py-2" style="background:#e3e5e8">
+                                <div class="d-flex align-items-center">
+                                    <span># {{ user_open_server.server_name }}</span>
+                                </div>
+                            </div>
+
+                            <!-- User list for the server -->
+                            <div class="user-list collapse " id="collapseExample">
+                                <ul class="list list-inline">
+                                    {% for item in server_people %}
+                                    {% if item.serverId == user_open_server.id %}
+                                    <li class="d-flex justify-content-between">
+                                        <div class="d-flex flex-row align-items-center">
+                                            <div class="ml-2">
+                                                <div class="commenterImage me-4">
+                                                    <img class="commenterImage"
+                                                         src="{{ item.person_name | gravatar }}"/>
+                                                </div>
+                                                <span class="mb-0 mx-2 fs-5">{{item.person_name}}</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2" style="height: 33rem;overflow-y:scroll"
+                             id="chatContainer-{{ user_open_server.id }}">
+                            <!-- Second row for message display area -->
+                            <div class="col-12">
+                                <div id="chatMessages-{{ user_open_server.id }}" class="chat-messages py-2">
+
+                                    <div class="container-fluid text-center">
+                                        <h2>Welcome to</h2>
+                                        <h2>{{ user_open_server.server_name }}</h2>
+                                        <p style="color:#6972a3">This is the beginning of this server.</p>
+                                    </div>
+
+                                    {% for past_message in past_messages %}
+                                    {% if user_open_server.id == past_message.server_id %}
+                                    {% if past_message.message == "Joined" %}
+                                    <div class="text-center my-3">
+                                                    <span class="new_joiner">
+                                                       {{past_message.user.username}} {{past_message.message}}
+                                                    </span>
+                                    </div>
+                                    {% elif past_message.sender_id == user.id %}
+                                    <div class="message-container">
+                                        <div class="message-right">
+                                            <div class="message-header">
+                                                <span class="username">{{past_message.user.username}}</span>
+                                                <span class="timestamp">{{past_message.curr_date}} {{past_message.time}}</span>
+                                            </div>
+                                            <div class="message">{{past_message.message}}</div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="message-container">
+                                        <div class="message-left">
+                                            <div class="message-header">
+                                                <span class="username">{{past_message.user.username}}</span>
+                                                <span class="timestamp">{{past_message.curr_date}} {{past_message.time}}</span>
+                                            </div>
+                                            <div class="message">{{past_message.message}}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endif %}
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row"> <!-- Third row for input message section -->
+                            <div class="col">
+                                <div class="chat-wrapper input-group mt-3">
+                                    <input type="text" id="messageInput-{{ user_open_server.id }}" class="form-control"
+                                           placeholder="Type your message">
+                                    <button class="btn btn-primary sendButton"
+                                            data-server-id="{{ user_open_server.id }}">Send
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% elif {'person_name':user.username, 'serverId': user_open_server.id} not
+                        in server_people %}
+
+                        <div class="messageBox">
+                            <div class="message">
+                                <h2>Welcome!</h2>
+                                <p>Welcome to our vibrant community! We're excited to have you on board. Dive in,
+                                    explore, and start making connections with like-minded individuals.</p>
+                                <button id="getStartedButton-{{ user_open_server.id }}" class="btn btn-primary"
+                                        data-server-id="{{ user_open_server.id }}">Get Started
+                                </button>
+                            </div>
+                        </div>
+                        <script>
+                            // JavaScript code for handling the "Get Started" button click
+                            var socket = io();
+                            document.getElementById('getStartedButton-{{ user_open_server.id }}').addEventListener('click', () => {
+                                const username = "{{ user.username }}";
+                                const serverId = "{{ user_open_server.id }}";
+                                socket.emit('join_server', { username: username, serverId: serverId });
+                            });
+
+
+                        </script>
+
+                        {% endif %}
+                    </div>
+
+                    {% elif category == "Personal" %}
+
+                    <div id="personalChatSection-{{ personal_chat.id }}" class="chat-section ">
+
+
+                        <div class="friend_user_server-row" data-server-id="{{ personal_chat.id }}">
+                            <div class="row fs-4 px-3 py-2" style="background:#e3e5e8">
+                                <div class="d-flex align-items-center">
+                                    <span> <img style="width:2rem;border-radius:50%"
+                                                src="{{ friend_user.username | gravatar }}"/></span>
+                                    <span class="mx-2 fs-6" style="font-weight:bold"> {{ friend_user.username }}</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <div class="row mt-2" style="height: 33rem;overflow-y:scroll"
+                             id="personalChatContainer-{{ personal_chat.id }}">
+                            <!-- Second row for message display area -->
+                            <div class="col-12">
+                                <div id="personalChatMessages-{{ personal_chat.id }}" class="chat-messages py-2">
+
+                                    <div class="container-fluid">
+                                        <img style="border-radius:50%" class="my-2"
+                                             src="{{friend_user.username | gravatar}}"/>
+                                        <h2 class="" style="font-weight:bold">{{ friend_user.fullname.title() if
+                                            friend_user.fullname else " "}}</h2>
+                                        <h4 class="">{{friend_user.username}}</h4>
+                                        <p class="my-3" style="color:#6972a3">This is the beginning of your direct
+                                            message with <strong> {{ friend_user.fullname.title() if
+                                                friend_user.fullname else friend_user.username }} </strong></p>
+                                        <hr class="mb-3"/>
+                                    </div>
+
+                                    {% for past_message in past_messages %}
+                                    {% if past_message.user_id == user.id %}
+                                    <div class="message-container">
+                                        <div class="message-right">
+                                            <div class="message-header">
+                                                <!--                                                <span class="username">{{past_message.user.username}}</span>-->
+                                                <span class="timestamp">{{past_message.curr_date}} {{past_message.time}}</span>
+                                            </div>
+                                            <div class="message">{{past_message.message}}</div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="message-container">
+                                        <div class="message-left">
+                                            <div class="message-header">
+                                                <!--                                                <span class="username">{{past_message.user.username}}</span>-->
+                                                <span class="timestamp">{{past_message.curr_date}} {{past_message.time}}</span>
+                                            </div>
+                                            <div class="message">{{past_message.message}}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row"> <!-- Third row for input message section -->
+                            <div class="col">
+                                <div class="chat-wrapper input-group mt-3">
+                                    <input type="text" id="personalMessageInput-{{ personal_chat.id }}"
+                                           class="form-control"
+                                           placeholder="Type your message">
+                                    <button class="btn btn-primary sendButton" data-server-id="{{ personal_chat.id }}">
+                                        Send
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Column 4 (only visible on laptop screens) -->
+                <div class="col-lg-2 d-none d-lg-block  full-height card-border">
+                    <div class="container-fluid">
+                        <p class="text-center" style="color:#6972a3">Your Friends</p>
+                    </div>
+                    {% for friend in new_friends: %}
+                    <!-- Container with hover effect -->
+                    <a href="{{url_for('friends_chat',id= friend.id )}}" type="button"
+                       style="text-decoration:None; color:black" class="row server-item text-start fs-6 py-3 row-hover"
+                       data-server-id="{{ friend.id }}">
+                        <div class="col-12">
+                            <div class="commenterImage me-4">
+                                <img class="commenterImage" src="{{ friend.username | gravatar }}"/>
+                            </div>
+                            {{ friend.username }}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- User Profile Modal -->
+<div class="modal fade" id="userProfileModal" tabindex="-1" aria-labelledby="userProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl"> <!-- Add modal-xl class for extra-large modal -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title col-8" id="userProfileModalLabel">User Profile</h5>
+
+                <button id="close_modal" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- User profile information -->
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-3 col-12 text-center">
+                            <img class="profileImage" style="width:10em"
+                                 src="{{user.username | gravatar}}"/>
+                            <div class="my-5 py-1"><a class="btn fs-4" href="{{url_for('edit_profile')}}"><i
+                                    class="bi bi-pencil-square"></i></a></div>
+                        </div>
+                        <div class="col-lg-8 col-12">
+                            <div class="card-body p-4">
+                                <h6>Information</h6>
+                                <hr class="mt-0 mb-4">
+                                <div class="row pt-1">
+                                    <div class="col-6 mb-3">
+                                        <h6>Fullname</h6>
+                                        <p class="text-muted">{{user.fullname if user.fullname else '-'}}</p>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <h6>Email</h6>
+                                        <p class="text-muted">{{user.email}}</p>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <h6>Username</h6>
+                                        <p class="text-muted">{{user.username}}</p>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <h6>Chat Chirp Member Since</h6>
+                                        <p class="text-muted">{{user.date}}</p>
+                                    </div>
+                                </div>
+                                <h6>Bio</h6>
+                                <hr class="mt-0 mb-4">
+                                <div class="row pt-1">
+                                    <div class="col-12 mb-3">
+                                        <p class="text-muted">{{ user.bio if user.bio else 'This is random text. You can
+                                            edit it'}}</p>
+                                    </div>
+
+                                </div>
+                                <div class="d-flex justify-content-start">
+                                    <a href="#!"><i class="fab fa-facebook-f fa-lg me-3"></i></a>
+                                    <a href="#!"><i class="fab fa-twitter fa-lg me-3"></i></a>
+                                    <a href="#!"><i class="fab fa-instagram fa-lg"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--- NOtification Modal -->
+
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="userProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md"> <!-- Add modal-xl class for extra-large modal -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title col-8" id="notificationModalLabel">Notification</h5>
+
+                <button id="closee_modal" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- User profile information -->
+                <div class="container-fluid">
+                    {% for notification in notifications | reverse %}
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"># {{notification.server_name}}</h5>
+                                <p class="card-text">{{notification.message}}</p>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Search Modal --->
+
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md"> <!-- Add modal-xl class for extra-large modal -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title col-8" id="searchModalLabel">Search For servers of DMs</h5>
+
+                <button id="search-close-modal" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-2 px-2" style="max-height:33rem;overflow-y:scroll;background-color: #eee">
+                <!-- User profile information -->
+                <div class="container-fluid my-4">
+                    <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2 " type="text" id="searchInput" oninput="updateFooter()"
+                               placeholder="Search" aria-label="Search">
+                        <!--                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>-->
+                    </form>
+                </div>
+                <div class="container-fluid my-2" id="searchResult"></div>
+            </div>
+
+            <div class="text-start px-2 ">
+                <p style="color:green"> PROTIP: <span style="color:black">Start searches with @ #</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Footer Navbar (Responsive) -->
+<nav class="navbar fixed-bottom navbar-light bg-light d-lg-none">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between w-100">
+            <button type="button" class="btn btn-primary">Option 1</button>
+            <button type="button" class="btn btn-primary">Option 2</button>
+            <button type="button" class="btn btn-primary">Option 3</button>
+        </div>
+    </div>
+</nav>
+
+<script>
+
+    socket = io();
+
+
+   document.querySelectorAll('.sendButton').forEach(button => {
+   button.addEventListener('click', () => {
+       const chatId = button.dataset.serverId;
+
+       var messageInput = "";
+
+       var message = "";
+       const senderId = {{ user.id }};
+       if( "{{ category }}" == "Server")
+       {
+        messageInput = document.getElementById(`messageInput-${chatId}`);
+        message = messageInput.value;
+       }
+       else if ( "{{ category }}" == "Personal")
+       {
+        messageInput = document.getElementById(`personalMessageInput-${chatId}`);
+        message = messageInput.value;
+
+       }
+
+
+       socket.emit('send_message', { chatId, message,senderId });
+       // Clear the message input field after sending the message
+       messageInput.value = '';
+   });
+
+   });
+
+
+   socket.on('message', (data) => {
+   const chatId = data.chatId;
+   const message = data.message;
+   const senderId = data.senderId
+
+   const username = data.username; // Assuming the username is included in the data
+   const timestamp = data.time; // Assuming the timestamp is included in the data
+   const date = data.curr_date;
+
+
+   if( "{{ category }}" == "Server") {
+
+       const chatMessagesContainer = document.getElementById(`chatContainer-${chatId}`);
+       const chatMessagesDiv = document.getElementById(`chatMessages-${chatId}`);
+       console.log("sender Id" , senderId , "chat id" , chatId , "User id" , {{user.id}} , chatMessagesDiv)
+
+       // Create a message container
+       const messageContainer = document.createElement('div');
+       if(message == "Joined"){
+       messageContainer.classList.add('text-center','my-3');
+       const messageDiv = document.createElement('span');
+       messageDiv.classList.add('new_joiner');
+       messageDiv.textContent = `${username} Joined`
+       messageContainer.appendChild(messageDiv)
+
+       if(senderId != {{ user.id }}){
+       chatMessagesDiv.appendChild(messageContainer)
+       }
+
+       }
+       else{
+       messageContainer.classList.add('message-container');
+       const new_messageDiv = document.createElement('div');
+
+
+       // Check if the message is from the current user
+       if (data.senderId === {{user.id}}) {
+           new_messageDiv.classList.add('message-right'); // Add class for messages from the current user
+       } else {
+           new_messageDiv.classList.add('message-left'); // Add class for messages from other users
+       }
+
+       const messageHeaderDiv = document.createElement('div');
+       messageHeaderDiv.classList.add('message-header');
+
+       const usernameSpan = document.createElement('span');
+       usernameSpan.classList.add('username');
+       usernameSpan.textContent = username;
+
+       const timestampSpan = document.createElement('span');
+       timestampSpan.classList.add('timestamp');
+       timestampSpan.textContent = `${date} ${timestamp}`;
+
+       const messageDiv = document.createElement('div');
+       messageDiv.classList.add('message');
+       messageDiv.textContent = message;
+
+       // Append elements to their respective parent containers
+       messageHeaderDiv.appendChild(usernameSpan);
+       messageHeaderDiv.appendChild(timestampSpan);
+       new_messageDiv.appendChild(messageHeaderDiv);
+       new_messageDiv.appendChild(messageDiv);
+       messageContainer.appendChild(new_messageDiv);
+
+       // Append the message container to the chat messages div
+       chatMessagesDiv.appendChild(messageContainer);
+
+       console.log(chatMessagesContainer)
+           chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+       }
+   }
+
+   else if( "{{category}}" == "Personal") {
+
+       const chatMessagesContainer = document.getElementById(`personalChatContainer-${chatId}`);
+       const chatMessagesDiv = document.getElementById(`personalChatMessages-${chatId}`);
+
+       // Create a message container
+       const messageContainer = document.createElement('div');
+
+
+       messageContainer.classList.add('message-container');
+       const new_messageDiv = document.createElement('div');
+
+
+       // Check if the message is from the current user
+       if (data.senderId === {{ user.id }}) {
+           new_messageDiv.classList.add('message-right'); // Add class for messages from the current user
+       } else {
+           new_messageDiv.classList.add('message-left'); // Add class for messages from other users
+       }
+
+       const messageHeaderDiv = document.createElement('div');
+       messageHeaderDiv.classList.add('message-header');
+
+
+       const timestampSpan = document.createElement('span');
+       timestampSpan.classList.add('timestamp');
+       timestampSpan.textContent = `${date} ${timestamp}`;
+
+       const messageDiv = document.createElement('div');
+       messageDiv.classList.add('message');
+       messageDiv.textContent = message;
+
+       // Append elements to their respective parent containers
+       messageHeaderDiv.appendChild(timestampSpan);
+       new_messageDiv.appendChild(messageHeaderDiv);
+       new_messageDiv.appendChild(messageDiv);
+       messageContainer.appendChild(new_messageDiv);
+
+       // Append the message container to the chat messages div
+       chatMessagesDiv.appendChild(messageContainer);
+
+       console.log(chatMessagesContainer)
+       chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+
+   }
+
+   });
+
+
+
+   const updateFooter = () => {
+     var inputText = document.getElementById('searchInput').value.trim().toLowerCase();
+    var modalBody = document.getElementById('searchResult');
+
+     if (inputText === '') {
+       modalBody.innerHTML = '<p>Start typing to get something</p>';
+     } else {
+       // Here you would implement the logic to check if the inputText
+       // matches any server or user name in your database
+       fetch('/servers')
+         .then(response => response.json())
+         .then(data => {
+       var suggestions = searchDataInDatabase(data,inputText);
+
+       if (suggestions.length > 0) {
+         var html = '';
+         suggestions.forEach(function(suggestion) {
+         var url = ""
+         if(suggestion.search_name[0] == "#"){
+          url = "{{ url_for('server_open', id=1) }}"; // Default ID, will be replaced
+         }
+         else{
+         url = "{{ url_for('friends_chat', id=1) }}"; // Default ID, will be replaced
+         }
+         url = url.replace('1', suggestion.search_id);
+           html += `<a href= ${url}   type="div" class="card my-3" style="text-decoration:None;color:black"> <div class="card-body"> <p class="card-text"> ${suggestion.search_name}  </p> </div> </a>`;
+         });
+         modalBody.innerHTML = html;
+       } else {
+         modalBody.innerHTML = '<p>No data found</p>';
+       }
+     }).catch(error => {
+           console.error('Error:', error);
+         });
+   }
+   }
+
+   function searchDataInDatabase(data, inputText) {
+     var filteredSuggestions = data.filter(function(item) {
+       if (inputText[0] == '#' || inputText[0] == '@') {
+       console.log(inputText)
+       return item.search_name.startsWith(inputText);
+       }
+       else {
+       return item.search_name.slice(1).startsWith(inputText);
+       }
+     });
+     console.log(filteredSuggestions)
+     return filteredSuggestions;
+   }
+
+
+
+       socket.on('redirect', function(data) {
+       // Get the URL from the data object
+       const url = data.url;
+
+       // Redirect to the specified URL
+       window.location.href = url;
+   });
+
+</script>
+
+{% include 'footer.html' %}
+{% endblock %}

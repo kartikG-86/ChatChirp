@@ -1,0 +1,25 @@
+ {% block content %}
+{% include 'header.html' %}
+<div class="container my-5 px-5">
+  <div class="row">
+    <div class="col-lg-6 px-5">
+      <a href="{{url_for('login')}}" class="card" style="width: 30rem; text-decoration: None;">
+        <img src="./static/assets/img/login.jpg" class="card-img-top" alt="..." />
+        <div class="card-body text-center text-dark fs-3">
+          <strong>Login</strong>
+        </div>
+      </a>
+    </div>
+    <div class="col-lg-6 px-5">
+      <a href="{{url_for('newUser')}}" class="card" style="width: 30rem; text-decoration: None;">
+        <img src="./static/assets/img/signup.jpg" class="card-img-top" alt="..." />
+        <div class="card-body text-center text-dark fs-3">
+          <strong>Signup</strong>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+ {% include 'footer.html' %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% block content %}
+{% include 'header.html' %}
+<nav class="navbar navbar-expand-lg bg-transparent">
+  <div class="container-fluid">
+    <a class="navbar-brand fs-3" href="#">
+      ChatChirp
+    </a>
+    <div class="justify-content-end" id="navbarSupportedContent">
+      <form class="d-flex" role="search">
+        <a class="btn btn-outline-primary rounded-pill" role="button" href="{{url_for('auth_page')}}">
+          Open ChatChirp
+        </a>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5 py-5">
+  <h1 class="display-4 text-center text-primary mb-4">
+    Welcome to ChatChirp
+  </h1>
+  <p class="lead text-center px-5">
+    ChatChirp is a vibrant community where you can connect, chat, and share with people from around the world. Join our diverse community today and start engaging in meaningful conversations!
+  </p>
+</div>
+
+
+{% include 'footer.html' %}
+{% endblock %}
