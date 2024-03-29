@@ -1,36 +1,43 @@
- {% block content %}
+{% block content %}
 {% include 'header.html' %}
 
 <div class="container py-5">
-  <div class="row justify-content-center py-5 my-5 mx-2">
-    <div class="col-md-8 col-lg-4 col-12">
-      <div class="card shadow p-3 mb-5 bg-white rounded">
-        <div class="card-body">
-          <h5 class="card-title text-center mb-4">Signup</h5>
-          <!-- Conditional rendering based on 'msg' -->
-          <!-- If 'msg' exists, apply 'text-success' or 'text-danger' class -->
-          <div class="text-success">
-            <h4><!-- msg variable goes here --></h4>
-          </div>
-          <form action="/newuser" method="post">
-            <div class="form-floating mb-3">
-              <input type="text" name="username" class="form-control" id="floatingInputUsername" placeholder="Username" required />
-              <label for="floatingInputUsername">Username</label>
+    <div class="row justify-content-center py-5 my-5 mx-2">
+        <div class="col-md-8 col-lg-4 col-12">
+            <div class="card shadow p-3 mb-5 bg-white rounded">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-4">Signup</h5>
+                    <!-- Conditional rendering based on 'msg' -->
+                    <!-- If 'msg' exists, apply 'text-success' or 'text-danger' class -->
+                    <div class="text-success">
+                        <h4><!-- msg variable goes here --></h4>
+                    </div>
+                    <form action="/newuser" method="post">
+                        <div class="form-floating mb-3">
+                            <input type="text" name="username" class="form-control" id="floatingInputUsername"
+                                   placeholder="Username" required/>
+                            <label for="floatingInputUsername">Username</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" name="email" class="form-control" id="floatingInputEmail"
+                                   placeholder="name@example.com" required/>
+                            <label for="floatingInputEmail">Email address</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" name="password" class="form-control" id="floatingPassword"
+                                   placeholder="Password" required/>
+                            <label for="floatingPassword">Password</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block col-12">Signup</button>
+                        <div class="my-3">
+
+                            <a style="text-decoration:None" href="{{url_for('login')}}">Already have an account? </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-floating mb-3">
-              <input type="email" name="email" class="form-control" id="floatingInputEmail" placeholder="name@example.com" required />
-              <label for="floatingInputEmail">Email address</label>
-            </div>
-            <div class="form-floating mb-3">
-              <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" required />
-              <label for="floatingPassword">Password</label>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block col-12">Signup</button>
-          </form>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 {% include 'footer.html' %}
