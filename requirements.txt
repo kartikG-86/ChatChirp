@@ -11,3 +11,4 @@ SQLAlchemy==2.0.25
 gunicorn==21.2.0
 psycopg2-binary==2.9.9
 Flask-Cors==3.0.10
+Flask-SocketIO==5.1.1
