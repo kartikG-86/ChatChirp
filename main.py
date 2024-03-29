@@ -3,7 +3,6 @@ from datetime import datetime
 from flask import Flask,render_template,request,redirect,url_for,session,jsonify,make_response
 from flask_cors import CORS, cross_origin
 from flask_bootstrap import Bootstrap5
-
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user,login_required
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import asc,text
@@ -16,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from flask_gravatar import Gravatar
 import secrets
 import string
+import os
 
 # to generate random id
 def generate_random_id(length=9):
@@ -24,7 +24,8 @@ def generate_random_id(length=9):
     return int(random_id)
 
 app = Flask(__name__ , static_url_path='/static')
-app.secret_key = "dsfdskljsdajdsjfh"
+app.secret_key = os.environ.get('FLASK_KEY')
+# "dsfdskljsdajdsjfh"
 Bootstrap5(app)
 # CORS(app,resources={r"/api/*": {"origins": "*", "methods": ["POST","GET"]}}, supports_credentials=True)
 
@@ -215,6 +216,7 @@ def forgotPassword():
     return render_template('forgotPassword.html', message=message)
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
@@ -228,6 +230,7 @@ def main_page():
     return render_template('main_page.html')
 
 @app.route('/servers')
+@login_required
 def get_servers():
     server_database = list(db.session.execute(db.select(Servers)).scalars())
     server_database = [{'search_name': '#' + item.server_name,'search_id':item.id} for item in server_database]
@@ -285,6 +288,7 @@ def get_user_details(id):
 
 
 @app.route('/edit_profile',methods=["POST","GET"])
+@login_required
 def edit_profile():
     user = db.session.execute(db.select(User).where(User.id == current_user.id)).scalar()
     if request.method == "POST":
@@ -306,10 +310,12 @@ socketio = SocketIO(app)
 servers = {}
 
 @app.route('/server')
+@login_required
 def new_server_create():
     return render_template('server.html')
 
 @app.route('/refresh')
+@login_required
 def refresh_page():
     # Perform some action or logic here
 
@@ -317,6 +323,7 @@ def refresh_page():
     return redirect(url_for('get_user_details'))
 
 @app.route('/api/friend/<int:id>')
+@login_required
 @login_required
 def friends_chat(id):
     print(id)
@@ -373,6 +380,7 @@ def friends_chat(id):
 
 
 @app.route('/api/server/<int:id>')
+@login_required
 def server_open(id):
     print(id)
     user_id = current_user.id
