@@ -1,1 +1,1 @@
-web: gunicorn -k gevent -w 4 main:app
+web: gunicorn -w 4 -b 0.0.0.0:$PORT --config gunicorn_config.py main:app
