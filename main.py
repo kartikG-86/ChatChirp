@@ -565,5 +565,5 @@ def send_message(data):
 if __name__ == "__main__":
    
     # app.run(debug=True)
-    socketio.run(app,allow_unsafe_werkzeug=True,debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000)
     # , host="0.0.0.0", port="8080"
