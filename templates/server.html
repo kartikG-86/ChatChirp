@@ -23,7 +23,9 @@
 </div>
 
 <script>
-  const socket = io();
+          const socket = io({
+            transports: ['polling']
+        });
 
   document.getElementById('createServerForm').addEventListener('submit', (event) => {
       event.preventDefault();
