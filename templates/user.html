@@ -195,7 +195,9 @@
                         </div>
                         <script>
                             // JavaScript code for handling the "Get Started" button click
-                            var socket = io();
+                            var socket = io({
+            transports: ['polling']
+        });;
                             document.getElementById('getStartedButton-{{ user_open_server.id }}').addEventListener('click', () => {
                                 const username = "{{ user.username }}";
                                 const serverId = "{{ user_open_server.id }}";
@@ -452,220 +454,222 @@
 
 <script>
 
-    socket = io();
+    socket = io({
+                transports: ['polling']
+            });
 
 
-   document.querySelectorAll('.sendButton').forEach(button => {
-   button.addEventListener('click', () => {
-       const chatId = button.dataset.serverId;
+       document.querySelectorAll('.sendButton').forEach(button => {
+       button.addEventListener('click', () => {
+           const chatId = button.dataset.serverId;
 
-       var messageInput = "";
+           var messageInput = "";
 
-       var message = "";
-       const senderId = {{ user.id }};
-       if( "{{ category }}" == "Server")
-       {
-        messageInput = document.getElementById(`messageInput-${chatId}`);
-        message = messageInput.value;
+           var message = "";
+           const senderId = {{ user.id }};
+           if( "{{ category }}" == "Server")
+           {
+            messageInput = document.getElementById(`messageInput-${chatId}`);
+            message = messageInput.value;
+           }
+           else if ( "{{ category }}" == "Personal")
+           {
+            messageInput = document.getElementById(`personalMessageInput-${chatId}`);
+            message = messageInput.value;
+
+           }
+
+
+           socket.emit('send_message', { chatId, message,senderId });
+           // Clear the message input field after sending the message
+           messageInput.value = '';
+       });
+
+       });
+
+
+       socket.on('message', (data) => {
+       const chatId = data.chatId;
+       const message = data.message;
+       const senderId = data.senderId
+
+       const username = data.username; // Assuming the username is included in the data
+       const timestamp = data.time; // Assuming the timestamp is included in the data
+       const date = data.curr_date;
+
+
+       if( "{{ category }}" == "Server") {
+
+           const chatMessagesContainer = document.getElementById(`chatContainer-${chatId}`);
+           const chatMessagesDiv = document.getElementById(`chatMessages-${chatId}`);
+           console.log("sender Id" , senderId , "chat id" , chatId , "User id" , {{user.id}} , chatMessagesDiv)
+
+           // Create a message container
+           const messageContainer = document.createElement('div');
+           if(message == "Joined"){
+           messageContainer.classList.add('text-center','my-3');
+           const messageDiv = document.createElement('span');
+           messageDiv.classList.add('new_joiner');
+           messageDiv.textContent = `${username} Joined`
+           messageContainer.appendChild(messageDiv)
+
+           if(senderId != {{ user.id }}){
+           chatMessagesDiv.appendChild(messageContainer)
+           }
+
+           }
+           else{
+           messageContainer.classList.add('message-container');
+           const new_messageDiv = document.createElement('div');
+
+
+           // Check if the message is from the current user
+           if (data.senderId === {{user.id}}) {
+               new_messageDiv.classList.add('message-right'); // Add class for messages from the current user
+           } else {
+               new_messageDiv.classList.add('message-left'); // Add class for messages from other users
+           }
+
+           const messageHeaderDiv = document.createElement('div');
+           messageHeaderDiv.classList.add('message-header');
+
+           const usernameSpan = document.createElement('span');
+           usernameSpan.classList.add('username');
+           usernameSpan.textContent = username;
+
+           const timestampSpan = document.createElement('span');
+           timestampSpan.classList.add('timestamp');
+           timestampSpan.textContent = `${date} ${timestamp}`;
+
+           const messageDiv = document.createElement('div');
+           messageDiv.classList.add('message');
+           messageDiv.textContent = message;
+
+           // Append elements to their respective parent containers
+           messageHeaderDiv.appendChild(usernameSpan);
+           messageHeaderDiv.appendChild(timestampSpan);
+           new_messageDiv.appendChild(messageHeaderDiv);
+           new_messageDiv.appendChild(messageDiv);
+           messageContainer.appendChild(new_messageDiv);
+
+           // Append the message container to the chat messages div
+           chatMessagesDiv.appendChild(messageContainer);
+
+           console.log(chatMessagesContainer)
+               chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+           }
        }
-       else if ( "{{ category }}" == "Personal")
-       {
-        messageInput = document.getElementById(`personalMessageInput-${chatId}`);
-        message = messageInput.value;
 
-       }
+       else if( "{{category}}" == "Personal") {
 
+           const chatMessagesContainer = document.getElementById(`personalChatContainer-${chatId}`);
+           const chatMessagesDiv = document.getElementById(`personalChatMessages-${chatId}`);
 
-       socket.emit('send_message', { chatId, message,senderId });
-       // Clear the message input field after sending the message
-       messageInput.value = '';
-   });
-
-   });
+           // Create a message container
+           const messageContainer = document.createElement('div');
 
 
-   socket.on('message', (data) => {
-   const chatId = data.chatId;
-   const message = data.message;
-   const senderId = data.senderId
-
-   const username = data.username; // Assuming the username is included in the data
-   const timestamp = data.time; // Assuming the timestamp is included in the data
-   const date = data.curr_date;
+           messageContainer.classList.add('message-container');
+           const new_messageDiv = document.createElement('div');
 
 
-   if( "{{ category }}" == "Server") {
+           // Check if the message is from the current user
+           if (data.senderId === {{ user.id }}) {
+               new_messageDiv.classList.add('message-right'); // Add class for messages from the current user
+           } else {
+               new_messageDiv.classList.add('message-left'); // Add class for messages from other users
+           }
 
-       const chatMessagesContainer = document.getElementById(`chatContainer-${chatId}`);
-       const chatMessagesDiv = document.getElementById(`chatMessages-${chatId}`);
-       console.log("sender Id" , senderId , "chat id" , chatId , "User id" , {{user.id}} , chatMessagesDiv)
-
-       // Create a message container
-       const messageContainer = document.createElement('div');
-       if(message == "Joined"){
-       messageContainer.classList.add('text-center','my-3');
-       const messageDiv = document.createElement('span');
-       messageDiv.classList.add('new_joiner');
-       messageDiv.textContent = `${username} Joined`
-       messageContainer.appendChild(messageDiv)
-
-       if(senderId != {{ user.id }}){
-       chatMessagesDiv.appendChild(messageContainer)
-       }
-
-       }
-       else{
-       messageContainer.classList.add('message-container');
-       const new_messageDiv = document.createElement('div');
+           const messageHeaderDiv = document.createElement('div');
+           messageHeaderDiv.classList.add('message-header');
 
 
-       // Check if the message is from the current user
-       if (data.senderId === {{user.id}}) {
-           new_messageDiv.classList.add('message-right'); // Add class for messages from the current user
-       } else {
-           new_messageDiv.classList.add('message-left'); // Add class for messages from other users
-       }
+           const timestampSpan = document.createElement('span');
+           timestampSpan.classList.add('timestamp');
+           timestampSpan.textContent = `${date} ${timestamp}`;
 
-       const messageHeaderDiv = document.createElement('div');
-       messageHeaderDiv.classList.add('message-header');
+           const messageDiv = document.createElement('div');
+           messageDiv.classList.add('message');
+           messageDiv.textContent = message;
 
-       const usernameSpan = document.createElement('span');
-       usernameSpan.classList.add('username');
-       usernameSpan.textContent = username;
+           // Append elements to their respective parent containers
+           messageHeaderDiv.appendChild(timestampSpan);
+           new_messageDiv.appendChild(messageHeaderDiv);
+           new_messageDiv.appendChild(messageDiv);
+           messageContainer.appendChild(new_messageDiv);
 
-       const timestampSpan = document.createElement('span');
-       timestampSpan.classList.add('timestamp');
-       timestampSpan.textContent = `${date} ${timestamp}`;
+           // Append the message container to the chat messages div
+           chatMessagesDiv.appendChild(messageContainer);
 
-       const messageDiv = document.createElement('div');
-       messageDiv.classList.add('message');
-       messageDiv.textContent = message;
-
-       // Append elements to their respective parent containers
-       messageHeaderDiv.appendChild(usernameSpan);
-       messageHeaderDiv.appendChild(timestampSpan);
-       new_messageDiv.appendChild(messageHeaderDiv);
-       new_messageDiv.appendChild(messageDiv);
-       messageContainer.appendChild(new_messageDiv);
-
-       // Append the message container to the chat messages div
-       chatMessagesDiv.appendChild(messageContainer);
-
-       console.log(chatMessagesContainer)
+           console.log(chatMessagesContainer)
            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-       }
-   }
 
-   else if( "{{category}}" == "Personal") {
-
-       const chatMessagesContainer = document.getElementById(`personalChatContainer-${chatId}`);
-       const chatMessagesDiv = document.getElementById(`personalChatMessages-${chatId}`);
-
-       // Create a message container
-       const messageContainer = document.createElement('div');
-
-
-       messageContainer.classList.add('message-container');
-       const new_messageDiv = document.createElement('div');
-
-
-       // Check if the message is from the current user
-       if (data.senderId === {{ user.id }}) {
-           new_messageDiv.classList.add('message-right'); // Add class for messages from the current user
-       } else {
-           new_messageDiv.classList.add('message-left'); // Add class for messages from other users
        }
 
-       const messageHeaderDiv = document.createElement('div');
-       messageHeaderDiv.classList.add('message-header');
-
-
-       const timestampSpan = document.createElement('span');
-       timestampSpan.classList.add('timestamp');
-       timestampSpan.textContent = `${date} ${timestamp}`;
-
-       const messageDiv = document.createElement('div');
-       messageDiv.classList.add('message');
-       messageDiv.textContent = message;
-
-       // Append elements to their respective parent containers
-       messageHeaderDiv.appendChild(timestampSpan);
-       new_messageDiv.appendChild(messageHeaderDiv);
-       new_messageDiv.appendChild(messageDiv);
-       messageContainer.appendChild(new_messageDiv);
-
-       // Append the message container to the chat messages div
-       chatMessagesDiv.appendChild(messageContainer);
-
-       console.log(chatMessagesContainer)
-       chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-
-   }
-
-   });
+       });
 
 
 
-   const updateFooter = () => {
-     var inputText = document.getElementById('searchInput').value.trim().toLowerCase();
-    var modalBody = document.getElementById('searchResult');
+       const updateFooter = () => {
+         var inputText = document.getElementById('searchInput').value.trim().toLowerCase();
+        var modalBody = document.getElementById('searchResult');
 
-     if (inputText === '') {
-       modalBody.innerHTML = '<p>Start typing to get something</p>';
-     } else {
-       // Here you would implement the logic to check if the inputText
-       // matches any server or user name in your database
-       fetch('/servers')
-         .then(response => response.json())
-         .then(data => {
-       var suggestions = searchDataInDatabase(data,inputText);
+         if (inputText === '') {
+           modalBody.innerHTML = '<p>Start typing to get something</p>';
+         } else {
+           // Here you would implement the logic to check if the inputText
+           // matches any server or user name in your database
+           fetch('/servers')
+             .then(response => response.json())
+             .then(data => {
+           var suggestions = searchDataInDatabase(data,inputText);
 
-       if (suggestions.length > 0) {
-         var html = '';
-         suggestions.forEach(function(suggestion) {
-         var url = ""
-         if(suggestion.search_name[0] == "#"){
-          url = "{{ url_for('server_open', id=1) }}"; // Default ID, will be replaced
-         }
-         else{
-         url = "{{ url_for('friends_chat', id=1) }}"; // Default ID, will be replaced
-         }
-         url = url.replace('1', suggestion.search_id);
-           html += `<a href= ${url}   type="div" class="card my-3" style="text-decoration:None;color:black"> <div class="card-body"> <p class="card-text"> ${suggestion.search_name}  </p> </div> </a>`;
+           if (suggestions.length > 0) {
+             var html = '';
+             suggestions.forEach(function(suggestion) {
+             var url = ""
+             if(suggestion.search_name[0] == "#"){
+              url = "{{ url_for('server_open', id=1) }}"; // Default ID, will be replaced
+             }
+             else{
+             url = "{{ url_for('friends_chat', id=1) }}"; // Default ID, will be replaced
+             }
+             url = url.replace('1', suggestion.search_id);
+               html += `<a href= ${url}   type="div" class="card my-3" style="text-decoration:None;color:black"> <div class="card-body"> <p class="card-text"> ${suggestion.search_name}  </p> </div> </a>`;
+             });
+             modalBody.innerHTML = html;
+           } else {
+             modalBody.innerHTML = '<p>No data found</p>';
+           }
+         }).catch(error => {
+               console.error('Error:', error);
+             });
+       }
+       }
+
+       function searchDataInDatabase(data, inputText) {
+         var filteredSuggestions = data.filter(function(item) {
+           if (inputText[0] == '#' || inputText[0] == '@') {
+           console.log(inputText)
+           return item.search_name.startsWith(inputText);
+           }
+           else {
+           return item.search_name.slice(1).startsWith(inputText);
+           }
          });
-         modalBody.innerHTML = html;
-       } else {
-         modalBody.innerHTML = '<p>No data found</p>';
+         console.log(filteredSuggestions)
+         return filteredSuggestions;
        }
-     }).catch(error => {
-           console.error('Error:', error);
-         });
-   }
-   }
-
-   function searchDataInDatabase(data, inputText) {
-     var filteredSuggestions = data.filter(function(item) {
-       if (inputText[0] == '#' || inputText[0] == '@') {
-       console.log(inputText)
-       return item.search_name.startsWith(inputText);
-       }
-       else {
-       return item.search_name.slice(1).startsWith(inputText);
-       }
-     });
-     console.log(filteredSuggestions)
-     return filteredSuggestions;
-   }
 
 
 
-       socket.on('redirect', function(data) {
-       // Get the URL from the data object
-       const url = data.url;
+           socket.on('redirect', function(data) {
+           // Get the URL from the data object
+           const url = data.url;
 
-       // Redirect to the specified URL
-       window.location.href = url;
-   });
+           // Redirect to the specified URL
+           window.location.href = url;
+       });
 
 </script>
 
